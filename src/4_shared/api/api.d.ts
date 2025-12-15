@@ -102,7 +102,7 @@ export interface paths {
       responses: {
         200: {
           content: {
-            'application/json': Category[];
+            'application/json': { data?: Category[]; meta: { total: number; cached_at: string } };
           };
         };
       };

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 
+import { QueryProvider } from '@/0_app/query';
 import { StoreProvider } from '@/0_app/redux/StoreProvider';
 
 import './globals.css';
@@ -26,10 +27,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <StoreProvider>
-      <html lang="en">
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
-      </html>
-    </StoreProvider>
+    <QueryProvider>
+      <StoreProvider>
+        <html lang="en">
+          <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+        </html>
+      </StoreProvider>
+    </QueryProvider>
   );
 }
