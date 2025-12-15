@@ -1,5 +1,7 @@
-import { keepPreviousData, queryOptions } from '@tanstack/react-query';
+import { infiniteQueryOptions, keepPreviousData, queryOptions } from '@tanstack/react-query';
 
+import type { PartialBy } from '../lib';
+import type { PathParams, QueryParams } from './api';
 import { requestClient } from './client';
 
 /**
@@ -21,45 +23,70 @@ export function categoriesOptions() {
 /**
  * Query options для получения категории по uuid или slug
  */
-export function categoryOptions({ id }: { id: string | null | undefined }) {
+export function categoryOptions({ idOrSlug }: PartialBy<PathParams<'/api/categories/{idOrSlug}'>, 'idOrSlug'>) {
   return queryOptions({
-    queryKey: [{ name: 'category', required: { id }, optional: {} }] as const,
+    queryKey: [{ name: 'category', required: { idOrSlug }, optional: {} }] as const,
     queryFn: async () => {
-      if (!id) throw new Error('Не указан id категории');
-      const { data, error } = await requestClient.GET('/api/categories/{id}', {
-        params: { path: { id } },
+      if (!idOrSlug) throw new Error('Не указан id или slug категории');
+      const { data, error } = await requestClient.GET('/api/categories/{idOrSlug}', {
+        params: { path: { idOrSlug } },
       });
-      if (error) throw new Error(`Не удалось получить категорию: ${id}`);
-      if (!data) throw new Error('Не получены данные категории');
-      return data;
+      if (error) throw new Error(`Не удалось получить категорию: ${idOrSlug}`);
+      if (!data.data) throw new Error('Не получены данные категории');
+      return data.data;
     },
-    enabled: Boolean(id),
+    enabled: Boolean(idOrSlug),
     placeholderData: keepPreviousData,
   });
 }
 
+type ProductsOptionsParams = Omit<PartialBy<QueryParams<'/api/products'>, 'category' | 'page'>, 'per_page'> & {
+  /** Количество товаров на странице (по умолчанию 16) */
+  perPage?: QueryParams<'/api/products'>['per_page'];
+};
 /**
- * Query options для получения всех товаров с опциональной фильтрацией по категории
+ * Query options для получения товаров с классической пагинацией (страницы 1, 2, 3...)
  */
-export function productsOptions({ category }: { category?: string } = {}) {
+export function productsOptions({ category, page = 1, perPage }: ProductsOptionsParams = {}) {
   return queryOptions({
-    queryKey: [{ name: 'products', required: {}, optional: { category } }] as const,
+    queryKey: [{ name: 'products', required: { page }, optional: { category, perPage } }] as const,
     queryFn: async () => {
       const { data, error } = await requestClient.GET('/api/products', {
-        params: { query: category ? { category } : undefined },
+        params: { query: { category, page, per_page: perPage } },
       });
       if (error) throw new Error('Не удалось получить товары');
-      if (!data) throw new Error('Не получены данные товаров');
-      return data;
+      if (!data.data) throw new Error('Не получены данные товаров');
+      return data; // Возвращаем с meta для отображения пагинации
     },
     placeholderData: keepPreviousData,
+  });
+}
+/**
+ * Infinite query options для бесконечной прокрутки товаров
+ */
+export function productsInfiniteOptions({ category, page = 1, perPage }: ProductsOptionsParams = {}) {
+  return infiniteQueryOptions({
+    queryKey: [{ name: 'products-infinite', required: {}, optional: { category, perPage } }] as const,
+    queryFn: async ({ pageParam }) => {
+      const { data, error } = await requestClient.GET('/api/products', {
+        params: { query: { category, page: pageParam, per_page: perPage } },
+      });
+      if (error) throw new Error('Не удалось получить товары');
+      if (!data.data) throw new Error('Не получены данные товаров');
+      return data; // Возвращаем с meta для определения следующей страницы
+    },
+    initialPageParam: page,
+    getNextPageParam: lastPage => {
+      const { current_page, last_page } = lastPage.meta;
+      return current_page < last_page ? current_page + 1 : undefined;
+    },
   });
 }
 
 /**
  * Query options для получения товара по uuid
  */
-export function productByUuidOptions({ uuid }: { uuid: string | null | undefined }) {
+export function productByUuidOptions({ uuid }: PartialBy<PathParams<'/api/products/{uuid}'>, 'uuid'>) {
   return queryOptions({
     queryKey: [{ name: 'product-uuid', required: { uuid }, optional: {} }] as const,
     queryFn: async () => {
@@ -68,8 +95,8 @@ export function productByUuidOptions({ uuid }: { uuid: string | null | undefined
         params: { path: { uuid } },
       });
       if (error) throw new Error(`Не удалось получить товар: ${uuid}`);
-      if (!data) throw new Error('Не получены данные товара');
-      return data;
+      if (!data.data) throw new Error('Не получены данные товара');
+      return data.data;
     },
     enabled: Boolean(uuid),
     placeholderData: keepPreviousData,
@@ -79,7 +106,7 @@ export function productByUuidOptions({ uuid }: { uuid: string | null | undefined
 /**
  * Query options для получения товара по slug
  */
-export function productBySlugOptions({ slug }: { slug: string | null | undefined }) {
+export function productBySlugOptions({ slug }: PartialBy<PathParams<'/api/products/slug/{slug}'>, 'slug'>) {
   return queryOptions({
     queryKey: [{ name: 'product-slug', required: { slug }, optional: {} }] as const,
     queryFn: async () => {
@@ -88,8 +115,8 @@ export function productBySlugOptions({ slug }: { slug: string | null | undefined
         params: { path: { slug } },
       });
       if (error) throw new Error(`Не удалось получить товар по slug: ${slug}`);
-      if (!data) throw new Error('Не получены данные товара');
-      return data;
+      if (!data.data) throw new Error('Не получены данные товара');
+      return data.data;
     },
     enabled: Boolean(slug),
     placeholderData: keepPreviousData,
