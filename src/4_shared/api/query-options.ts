@@ -1,4 +1,4 @@
-import { queryOptions } from '@tanstack/react-query';
+import { keepPreviousData, queryOptions } from '@tanstack/react-query';
 
 import { requestClient } from './client';
 
@@ -7,13 +7,14 @@ import { requestClient } from './client';
  */
 export function categoriesOptions() {
   return queryOptions({
-    queryKey: [{ name: 'ekapak-categories', required: {}, optional: {} }] as const,
+    queryKey: [{ name: 'categories', required: {}, optional: {} }] as const,
     queryFn: async () => {
       const { data, error } = await requestClient.GET('/api/categories');
       if (error) throw new Error('Не удалось получить категории');
-      if (!data) throw new Error('Не получены данные категорий');
-      return data;
+      if (!data.data) throw new Error('Не получены данные категорий');
+      return data.data;
     },
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -22,7 +23,7 @@ export function categoriesOptions() {
  */
 export function categoryOptions({ id }: { id: string | null | undefined }) {
   return queryOptions({
-    queryKey: [{ name: 'ekapak-category', required: { id }, optional: {} }] as const,
+    queryKey: [{ name: 'category', required: { id }, optional: {} }] as const,
     queryFn: async () => {
       if (!id) throw new Error('Не указан id категории');
       const { data, error } = await requestClient.GET('/api/categories/{id}', {
@@ -33,6 +34,7 @@ export function categoryOptions({ id }: { id: string | null | undefined }) {
       return data;
     },
     enabled: Boolean(id),
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -41,7 +43,7 @@ export function categoryOptions({ id }: { id: string | null | undefined }) {
  */
 export function productsOptions({ category }: { category?: string } = {}) {
   return queryOptions({
-    queryKey: [{ name: 'ekapak-products', required: {}, optional: { category } }] as const,
+    queryKey: [{ name: 'products', required: {}, optional: { category } }] as const,
     queryFn: async () => {
       const { data, error } = await requestClient.GET('/api/products', {
         params: { query: category ? { category } : undefined },
@@ -50,6 +52,7 @@ export function productsOptions({ category }: { category?: string } = {}) {
       if (!data) throw new Error('Не получены данные товаров');
       return data;
     },
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -58,7 +61,7 @@ export function productsOptions({ category }: { category?: string } = {}) {
  */
 export function productByUuidOptions({ uuid }: { uuid: string | null | undefined }) {
   return queryOptions({
-    queryKey: [{ name: 'ekapak-product-uuid', required: { uuid }, optional: {} }] as const,
+    queryKey: [{ name: 'product-uuid', required: { uuid }, optional: {} }] as const,
     queryFn: async () => {
       if (!uuid) throw new Error('Не указан uuid товара');
       const { data, error } = await requestClient.GET('/api/products/{uuid}', {
@@ -69,6 +72,7 @@ export function productByUuidOptions({ uuid }: { uuid: string | null | undefined
       return data;
     },
     enabled: Boolean(uuid),
+    placeholderData: keepPreviousData,
   });
 }
 
@@ -77,7 +81,7 @@ export function productByUuidOptions({ uuid }: { uuid: string | null | undefined
  */
 export function productBySlugOptions({ slug }: { slug: string | null | undefined }) {
   return queryOptions({
-    queryKey: [{ name: 'ekapak-product-slug', required: { slug }, optional: {} }] as const,
+    queryKey: [{ name: 'product-slug', required: { slug }, optional: {} }] as const,
     queryFn: async () => {
       if (!slug) throw new Error('Не указан slug товара');
       const { data, error } = await requestClient.GET('/api/products/slug/{slug}', {
@@ -88,5 +92,6 @@ export function productBySlugOptions({ slug }: { slug: string | null | undefined
       return data;
     },
     enabled: Boolean(slug),
+    placeholderData: keepPreviousData,
   });
 }
