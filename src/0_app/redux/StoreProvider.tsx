@@ -3,13 +3,19 @@
 import { setupListeners } from '@reduxjs/toolkit/query';
 import { type PropsWithChildren, useEffect, useRef } from 'react';
 import { Provider } from 'react-redux';
+import type { Persistor } from 'redux-persist';
+import { PersistGate } from 'redux-persist/integration/react';
 
-import { makeStore } from './store';
-import type { AppStore } from './types';
+import { makePersistor, makeStore } from './store';
 
 export function StoreProvider({ children }: PropsWithChildren) {
   const storeRef = useRef<AppStore | null>(null);
-  if (!storeRef.current) storeRef.current = makeStore();
+  const persistorRef = useRef<Persistor | null>(null);
+
+  if (!storeRef.current) {
+    storeRef.current = makeStore();
+    persistorRef.current = makePersistor(storeRef.current);
+  }
 
   useEffect(() => {
     if (!storeRef.current) return;
@@ -18,5 +24,11 @@ export function StoreProvider({ children }: PropsWithChildren) {
     return unsubscribe;
   }, []);
 
-  return <Provider store={storeRef.current}>{children}</Provider>;
+  return (
+    <Provider store={storeRef.current}>
+      <PersistGate loading={null} persistor={persistorRef.current!}>
+        {children}
+      </PersistGate>
+    </Provider>
+  );
 }

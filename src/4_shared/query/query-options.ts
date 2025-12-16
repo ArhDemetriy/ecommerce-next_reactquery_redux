@@ -1,8 +1,8 @@
 import { infiniteQueryOptions, keepPreviousData, queryOptions } from '@tanstack/react-query';
 
+import type { PathParams, QueryParams } from '../api/api';
+import { requestClient } from '../api/client';
 import type { PartialBy } from '../lib';
-import type { PathParams, QueryParams } from './api';
-import { requestClient } from './client';
 
 /**
  * Query options для получения всех категорий

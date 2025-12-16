@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 
-import { CategoriesList } from '@/2_widgets/CategoriesList';
+import { CategoriesList } from '@/1_widgets/CategoriesList/CategoriesList';
 
 export const metadata: Metadata = {
   title: 'Категории | E-commerce',

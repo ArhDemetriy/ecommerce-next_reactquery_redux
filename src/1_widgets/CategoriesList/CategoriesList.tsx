@@ -1,9 +1,8 @@
-import { Suspense } from 'react';
 import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
+import { Suspense } from 'react';
 
-import { getQueryClient } from '@/0_app/query';
+import { categoriesOptions, getQueryClient } from '@/4_shared/query';
 import { Skeleton } from '@/4_shared/ui';
-import { categoriesOptions } from '@/4_shared/api';
 
 import { CategoriesListClient } from './CategoriesListClient';
 

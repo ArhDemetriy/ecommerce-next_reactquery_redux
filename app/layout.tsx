@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 
 import { QueryProvider } from '@/0_app/query';
-import { StoreProvider } from '@/0_app/redux/StoreProvider';
+import { StoreProvider } from '@/0_app/redux';
 
 import './globals.css';
 

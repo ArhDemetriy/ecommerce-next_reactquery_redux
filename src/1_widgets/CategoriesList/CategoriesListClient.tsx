@@ -2,7 +2,7 @@
 
 import { useSuspenseQuery } from '@tanstack/react-query';
 
-import { categoriesOptions } from '@/4_shared/api';
+import { categoriesOptions } from '@/4_shared/query';
 
 export function CategoriesListClient() {
   const { data: categories } = useSuspenseQuery(categoriesOptions());
