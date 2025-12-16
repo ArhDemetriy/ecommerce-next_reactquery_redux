@@ -6,6 +6,10 @@
   --blue: #00b0ff;
   --blue-active: #43c5ff;
 
+  /* Status colors */
+  --green: #2ac84d;
+  --green-light: #edfff1;
+
   /* Neutral colors */
   --black: #2c2c2c;
   --gray: #9a9a9a;
@@ -19,6 +23,10 @@
   --color-blue: var(--blue);
   --color-blue-active: var(--blue-active);
 
+  /* Status colors */
+  --color-green: var(--green);
+  --color-green-light: var(--green-light);
+
   /* Neutral colors */
   --color-black: var(--black);
   --color-gray: var(--gray);
@@ -28,6 +36,47 @@
 
   /* Fonts */
   --font-sans: var(--font-manrope-sans);
+
+  /* Typography tokens */
+  /* H1: 40px, bold, lh 1.3 */
+  --font-size-h1: 2.5rem;
+  --font-size-h1--line-height: 1.3;
+  --font-size-h1--font-weight: 700;
+
+  /* H2: 30px, bold, lh 1.3 */
+  --font-size-h2: 1.875rem;
+  --font-size-h2--line-height: 1.3;
+  --font-size-h2--font-weight: 700;
+
+  /* H3: 24px, bold, lh 1.4 */
+  --font-size-h3: 1.5rem;
+  --font-size-h3--line-height: 1.4;
+  --font-size-h3--font-weight: 700;
+
+  /* Body: 18px, regular, lh 1.4 */
+  --font-size-body: 1.125rem;
+  --font-size-body--line-height: 1.4;
+  --font-size-body--font-weight: 400;
+
+  /* Body Bold: 18px, bold, lh 1.4 */
+  --font-size-body-bold: 1.125rem;
+  --font-size-body-bold--line-height: 1.4;
+  --font-size-body-bold--font-weight: 700;
+
+  /* Catalog: 16px, regular, lh 1.4 */
+  --font-size-catalog: 1rem;
+  --font-size-catalog--line-height: 1.4;
+  --font-size-catalog--font-weight: 400;
+
+  /* Price: 14px, bold, lh 1.4 */
+  --font-size-price: 0.875rem;
+  --font-size-price--line-height: 1.4;
+  --font-size-price--font-weight: 700;
+
+  /* Description: 14px, regular, lh 1.4 */
+  --font-size-description: 0.875rem;
+  --font-size-description--line-height: 1.4;
+  --font-size-description--font-weight: 400;
 }
 
 @layer base {
