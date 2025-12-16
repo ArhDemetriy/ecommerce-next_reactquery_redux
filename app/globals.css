@@ -2,29 +2,39 @@
 @import 'tw-animate-css';
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Primary colors */
+  --blue: #00b0ff;
+  --blue-active: #43c5ff;
+
+  /* Neutral colors */
+  --black: #2c2c2c;
+  --gray: #9a9a9a;
+  --stroke: #d4d4d4;
+  --background: #f5f7fb;
+  --white: #ffffff;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Primary colors */
+  --color-blue: var(--blue);
+  --color-blue-active: var(--blue-active);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Neutral colors */
+  --color-black: var(--black);
+  --color-gray: var(--gray);
+  --color-stroke: var(--stroke);
+  --color-background: var(--background);
+  --color-white: var(--white);
+
+  /* Fonts */
+  --font-sans: var(--font-manrope-sans);
 }
 
 @layer base {
   body {
     background: var(--background);
-    color: var(--foreground);
-    font-family: Arial, Helvetica, sans-serif;
+    color: var(--black);
+    font-family: var(--font-sans), Arial, Helvetica, sans-serif;
   }
 
   button:not(:disabled),

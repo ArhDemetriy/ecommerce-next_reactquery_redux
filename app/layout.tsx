@@ -1,19 +1,15 @@
 import type { Metadata } from 'next';
-import { Geist, Geist_Mono } from 'next/font/google';
+import { Manrope } from 'next/font/google';
 
 import { QueryProvider } from '@/0_app/query';
 import { StoreProvider } from '@/0_app/redux';
 
 import './globals.css';
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-});
-
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
+const manropeSans = Manrope({
+  variable: '--font-manrope-sans',
+  subsets: ['latin', 'cyrillic'],
+  weight: ['400', '700'],
 });
 
 export const metadata: Metadata = {
@@ -29,8 +25,8 @@ export default function RootLayout({
   return (
     <QueryProvider>
       <StoreProvider>
-        <html lang="en">
-          <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+        <html lang="ru">
+          <body className={`${manropeSans.variable} antialiased`}>{children}</body>
         </html>
       </StoreProvider>
     </QueryProvider>
