@@ -8,9 +8,14 @@ import { CategoriesListClient } from './CategoriesListClient';
 
 export function CategoriesList() {
   return (
-    <Suspense fallback={<Skeleton className="min-h-40" />}>
-      <CategoriesListLoader />
-    </Suspense>
+    <aside className="hidden w-[353px] shrink-0 rounded-[20px] bg-white p-[30px] sm:block">
+      <h2 className="mb-6 text-h3 text-black">Каталог товаров</h2>
+      <ul className="flex flex-col gap-2.5">
+        <Suspense fallback={<CategoriesListSkeleton />}>
+          <CategoriesListLoader />
+        </Suspense>
+      </ul>
+    </aside>
   );
 }
 
@@ -22,5 +27,17 @@ async function CategoriesListLoader() {
     <HydrationBoundary state={dehydrate(queryClient)}>
       <CategoriesListClient />
     </HydrationBoundary>
+  );
+}
+
+function CategoriesListSkeleton() {
+  return (
+    <>
+      {Array.from({ length: 8 }).map((_, index) => (
+        <div key={index} className="border-b border-background py-2.5">
+          <Skeleton className="h-5 w-full" />
+        </div>
+      ))}
+    </>
   );
 }

@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import type { Metadata } from 'next';
 import { Manrope } from 'next/font/google';
 
@@ -26,7 +27,14 @@ export default function RootLayout({
     <QueryProvider>
       <StoreProvider>
         <html lang="ru">
-          <body className={`${manropeSans.variable} antialiased`}>{children}</body>
+          <body
+            className={clsx(
+              'overflow-x-hidden overflow-y-auto bg-background text-body text-black antialiased',
+              manropeSans.variable
+            )}
+          >
+            {children}
+          </body>
         </html>
       </StoreProvider>
     </QueryProvider>
