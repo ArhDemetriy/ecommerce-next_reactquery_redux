@@ -5,10 +5,10 @@ import type { ApiResponse } from '@/4_shared/api';
 
 type CategoryCardProps = ApiResponse<'/api/categories'>['data'][number];
 
-export function CategoryCardVertical({ name, slug, image_url, min_price }: CategoryCardProps) {
+export function CategoryCardVertical({ name, slug, uuid, image_url, min_price }: CategoryCardProps) {
   return (
     <Link
-      href={`/catalog/${slug}`}
+      href={`/catalog/${uuid}`}
       className="flex h-full flex-col overflow-hidden rounded-[10px] border border-stroke bg-white"
     >
       <div className="p-5">
@@ -24,10 +24,10 @@ export function CategoryCardVertical({ name, slug, image_url, min_price }: Categ
   );
 }
 
-export function CategoryCardHorizontal({ name, slug, image_url, min_price }: CategoryCardProps) {
+export function CategoryCardHorizontal({ name, slug, uuid, image_url, min_price }: CategoryCardProps) {
   return (
     <Link
-      href={`/catalog/${slug}`}
+      href={`/catalog/${uuid}`}
       className="flex items-center overflow-hidden rounded-[10px] border border-stroke bg-white"
     >
       {/* Текстовый блок слева */}

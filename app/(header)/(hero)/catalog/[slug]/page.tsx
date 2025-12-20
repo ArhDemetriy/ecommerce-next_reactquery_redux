@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 
 import { CategoryGridHorizontal } from '@/1_widgets/CategoryGrid';
 import { ProductsGrid } from '@/1_widgets/ProductsGrid';
-import { categoryOptions } from '@/4_shared/query';
+import { categoriesOptions, categoryOptions } from '@/4_shared/query';
 import { getQueryClient } from '@/4_shared/query/getQueryClient';
 
 interface Props {
@@ -12,25 +12,28 @@ interface Props {
 
 export const dynamicParams = true;
 export async function generateStaticParams() {
-  return [];
-  // try {
-  //   const queryClient = getQueryClient();
+  // return [];
 
-  //   const allCategories = await queryClient.fetchQuery(categoriesOptions());
-  //   const slugs: Set<(typeof allCategories)[number]['slug']> = new Set();
-  //   (function extractSlugs(categories: typeof allCategories) {
-  //     for (const { slug, children } of categories) {
-  //       if (slugs.has(slug)) continue;
-  //       slugs.add(slug);
-  //       if (children?.length) extractSlugs(children);
-  //     }
-  //   })(allCategories);
+  try {
+    const queryClient = getQueryClient();
 
-  //   return Array.from(slugs).map(slug => ({ slug }) satisfies Props);
-  // } catch (error) {
-  //   console.error('Ошибка при генерации статических параметров категорий:', error);
-  //   return [];
-  // }
+    const allCategories = await queryClient.fetchQuery(categoriesOptions());
+    if (!allCategories?.length) return [];
+
+    const uuids: Set<(typeof allCategories)[number]['uuid']> = new Set();
+    (function extractSlugs(categories: typeof allCategories) {
+      for (const { uuid, children } of categories) {
+        if (uuids.has(uuid)) continue;
+        uuids.add(uuid);
+        if (children?.length) extractSlugs(children);
+      }
+    })(allCategories);
+
+    return Array.from(uuids).map(uuid => ({ slug: uuid }) satisfies Props);
+  } catch (error) {
+    console.error('Ошибка при генерации статических параметров категорий:', error);
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: { params: Promise<Props> }) {
@@ -60,7 +63,7 @@ export default async function CatalogSlugPage({
   if (!category) notFound();
 
   const isProductPage = !category.children?.length;
-  if (!isProductPage) return <CategoryGridHorizontal parentSlug={category.slug} />;
+  if (!isProductPage) return <CategoryGridHorizontal parentSlug={slug} />;
 
   const page = Math.max(1, Math.round(parseInt((await searchParams).page ?? '1') || 1));
   return <ProductsGrid category={category.uuid} page={page} />;
