@@ -24,19 +24,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <QueryProvider>
-      <StoreProvider>
-        <html lang="ru">
-          <body
-            className={clsx(
-              'overflow-x-hidden overflow-y-auto bg-background text-body text-black antialiased',
-              manropeSans.variable
-            )}
-          >
-            {children}
-          </body>
-        </html>
-      </StoreProvider>
-    </QueryProvider>
+    <html lang="ru">
+      <body
+        className={clsx(
+          'overflow-x-hidden overflow-y-auto bg-background text-body text-black antialiased',
+          manropeSans.variable
+        )}
+      >
+        <QueryProvider>
+          <StoreProvider>{children}</StoreProvider>
+        </QueryProvider>
+      </body>
+    </html>
   );
 }
