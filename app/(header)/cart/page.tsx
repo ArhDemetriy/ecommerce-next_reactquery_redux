@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 
+import { CartPageContent } from '@/1_widgets/Cart';
 import { Breadcrumbs } from '@/4_shared/ui';
 
 export const metadata: Metadata = {
@@ -10,14 +11,7 @@ export default function Cart() {
   return (
     <div className="flex w-full flex-col gap-5">
       <Breadcrumbs items={[{ label: 'Главная', href: '/' }, { label: 'Корзина' }]} />
-      <div className="flex justify-between">
-        <div className="relative flex items-center justify-start">
-          <div className="absolute w-max">Вернуться к покупкам</div>
-        </div>
-        <h1>Корзина</h1>
-        <div></div>
-      </div>
-      <div className="flex flex-wrap justify-between gap-5">Контент корзины</div>
+      <CartPageContent />
     </div>
   );
 }
