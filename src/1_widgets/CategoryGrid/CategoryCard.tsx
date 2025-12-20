@@ -5,7 +5,7 @@ import type { ApiResponse } from '@/4_shared/api';
 
 type CategoryCardProps = ApiResponse<'/api/categories'>['data'][number];
 
-export function CategoryCardVertical({ name, slug, uuid, image_url, min_price }: CategoryCardProps) {
+export function CategoryCardVertical({ name, uuid, image_url, min_price }: CategoryCardProps) {
   return (
     <Link
       href={`/catalog/${uuid}`}
@@ -24,7 +24,7 @@ export function CategoryCardVertical({ name, slug, uuid, image_url, min_price }:
   );
 }
 
-export function CategoryCardHorizontal({ name, slug, uuid, image_url, min_price }: CategoryCardProps) {
+export function CategoryCardHorizontal({ name, uuid, image_url, min_price }: CategoryCardProps) {
   return (
     <Link
       href={`/catalog/${uuid}`}
