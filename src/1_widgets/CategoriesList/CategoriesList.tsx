@@ -8,7 +8,7 @@ import { CategoriesListClient } from './CategoriesListClient';
 
 export function CategoriesList() {
   return (
-    <aside className="hidden w-[353px] shrink-0 rounded-[20px] bg-white p-[30px] sm:block">
+    <aside className="hidden w-[352px] shrink-0 rounded-[20px] bg-white p-[30px] sm:block">
       <h2 className="mb-6 text-h3 text-black">Каталог товаров</h2>
       <ul className="flex flex-col gap-2.5">
         <Suspense fallback={<CategoriesListSkeleton />}>

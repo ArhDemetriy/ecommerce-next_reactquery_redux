@@ -251,36 +251,6 @@ interface CategoryDetail {
   children: Category[] | null;
 }
 
-/** Товар в списке (/api/products) */
-interface ProductListItem {
-  /** UUID товара */
-  uuid: string;
-  /** Название товара */
-  name: string;
-  /** Описание товара (plain text) */
-  description: string;
-  /** Слаг для URL */
-  slug: string;
-  /** UUID категории */
-  category_uuid: string;
-  /** Минимальная цена среди офферов (строка) */
-  offers_min_price: string;
-  /** Торговые предложения */
-  offers: Offer[];
-  /** SEO-описание */
-  seo_description: string;
-  /** Минимальная покупка в штуках */
-  'Мин. покупка, шт.': string;
-  /** Наличие на складе: "Да в наличии" | "Нет под заказ" */
-  Наличие: string;
-  /** Артикул товара */
-  article: string;
-  /** Изображения товара */
-  images: ProductImage[];
-  /** Динамические свойства (характеристики) */
-  properties: Record<string, string>;
-}
-
 /** Детальная информация о товаре (/api/products/{uuid} или /api/products/slug/{slug}) */
 interface Product {
   /** UUID товара */
@@ -362,6 +332,11 @@ export interface paths {
             'application/json': { data: CategoryDetail };
           };
         };
+        404: {
+          content: {
+            'application/json': { message: string };
+          };
+        };
       };
     };
   };
@@ -382,7 +357,38 @@ export interface paths {
       responses: {
         200: {
           content: {
-            'application/json': { data: ProductListItem[]; meta: ProductsApiMeta };
+            'application/json': {
+              meta: ProductsApiMeta;
+              /** Список товаров с сокращённой информацией о них. */
+              data: Array<{
+                /** UUID товара */
+                uuid: string;
+                /** Название товара */
+                name: string;
+                /** Описание товара (plain text) */
+                description: string;
+                /** Слаг для URL */
+                slug: string;
+                /** UUID категории */
+                category_uuid: string;
+                /** Минимальная цена среди офферов (строка) */
+                offers_min_price: string;
+                /** Торговые предложения */
+                offers: Offer[];
+                /** SEO-описание */
+                seo_description: string;
+                /** Минимальная покупка в штуках */
+                'Мин. покупка, шт.': string;
+                /** Наличие на складе: "Да в наличии" | "Нет под заказ" */
+                Наличие: string;
+                /** Артикул товара */
+                article: string;
+                /** Изображения товара */
+                images: ProductImage[];
+                /** Динамические свойства (характеристики) */
+                properties: Record<string, string>;
+              }>;
+            };
           };
         };
       };

@@ -12,9 +12,12 @@ export function categoriesOptions() {
     queryKey: [{ name: 'categories', required: {}, optional: {} }] as const,
     queryFn: async () => {
       const { data, error } = await requestClient.GET('/api/categories');
-      if (error) throw new Error('Не удалось получить категории');
-      if (!data.data) throw new Error('Не получены данные категорий');
-      return data.data;
+      if (error) {
+        console.error('Не удалось получить категории');
+        return null;
+      }
+      if (!data.data) console.error('Не получены данные категорий');
+      return data.data ?? null;
     },
     placeholderData: keepPreviousData,
   });
@@ -31,9 +34,12 @@ export function categoryOptions({ idOrSlug }: PartialBy<PathParams<'/api/categor
       const { data, error } = await requestClient.GET('/api/categories/{idOrSlug}', {
         params: { path: { idOrSlug } },
       });
-      if (error) throw new Error(`Не удалось получить категорию: ${idOrSlug}`);
-      if (!data.data) throw new Error('Не получены данные категории');
-      return data.data;
+      if (error) {
+        console.error(`Не удалось получить категорию: ${idOrSlug} ; Error mesage: ${error.message}`);
+        return null;
+      }
+      if (!data.data) console.error('Не получены данные категории');
+      return data.data ?? null;
     },
     enabled: Boolean(idOrSlug),
     placeholderData: keepPreviousData,
@@ -54,9 +60,12 @@ export function productsOptions({ category, page = 1, perPage }: ProductsOptions
       const { data, error } = await requestClient.GET('/api/products', {
         params: { query: { category, page, per_page: perPage } },
       });
-      if (error) throw new Error('Не удалось получить товары');
-      if (!data.data) throw new Error('Не получены данные товаров');
-      return data; // Возвращаем с meta для отображения пагинации
+      if (error) {
+        console.error('Не удалось получить товары');
+        return null;
+      }
+      if (!data.data) console.error('Не получены данные товаров');
+      return data ?? null; // Возвращаем с meta для отображения пагинации
     },
     placeholderData: keepPreviousData,
   });
@@ -71,12 +80,16 @@ export function productsInfiniteOptions({ category, page = 1, perPage }: Product
       const { data, error } = await requestClient.GET('/api/products', {
         params: { query: { category, page: pageParam, per_page: perPage } },
       });
-      if (error) throw new Error('Не удалось получить товары');
-      if (!data.data) throw new Error('Не получены данные товаров');
-      return data; // Возвращаем с meta для определения следующей страницы
+      if (error) {
+        console.error('Не удалось получить товары');
+        return null;
+      }
+      if (!data.data) console.error('Не получены данные товаров');
+      return data ?? null; // Возвращаем с meta для определения следующей страницы
     },
     initialPageParam: page,
     getNextPageParam: lastPage => {
+      if (!lastPage) return;
       const { current_page, last_page } = lastPage.meta;
       return current_page < last_page ? current_page + 1 : undefined;
     },
@@ -94,9 +107,13 @@ export function productByUuidOptions({ uuid }: PartialBy<PathParams<'/api/produc
       const { data, error } = await requestClient.GET('/api/products/{uuid}', {
         params: { path: { uuid } },
       });
-      if (error) throw new Error(`Не удалось получить товар: ${uuid}`);
-      if (!data.data) throw new Error('Не получены данные товара');
-      return data.data;
+
+      if (error) {
+        console.error(`Не удалось получить товар: ${uuid}`);
+        return null;
+      }
+      if (!data.data) console.error('Не получены данные товара');
+      return data.data ?? null;
     },
     enabled: Boolean(uuid),
     placeholderData: keepPreviousData,
@@ -114,9 +131,12 @@ export function productBySlugOptions({ slug }: PartialBy<PathParams<'/api/produc
       const { data, error } = await requestClient.GET('/api/products/slug/{slug}', {
         params: { path: { slug } },
       });
-      if (error) throw new Error(`Не удалось получить товар по slug: ${slug}`);
-      if (!data.data) throw new Error('Не получены данные товара');
-      return data.data;
+      if (error) {
+        console.error(`Не удалось получить товар по slug: ${slug}`);
+        return null;
+      }
+      if (!data.data) console.error('Не получены данные товара');
+      return data.data ?? null;
     },
     enabled: Boolean(slug),
     placeholderData: keepPreviousData,

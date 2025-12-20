@@ -4,34 +4,39 @@ import { Suspense } from 'react';
 import { getQueryClient, productsOptions } from '@/4_shared/query';
 import { Skeleton } from '@/4_shared/ui';
 
-import { ProductsGridClient, ProductsGridEmptyMessageClient } from './ProductsGridClient';
+import { NextPageButton, ProductsGridClient, ProductsGridEmptyMessageClient } from './ProductsGridClient';
 
 interface ProductsGridProps {
+  /** UUID категории для фильтрации */
   category?: string;
+  page?: number;
 }
 
-export function ProductsGrid({ category }: ProductsGridProps) {
+export function ProductsGrid({ category, page }: ProductsGridProps) {
   return (
-    <div className="rounded-[10px] bg-white p-5 sm:rounded-[20px] sm:p-[30px]">
+    <>
       <Suspense fallback={null}>
-        <ProductsGridEmptyMessageClient category={category} />
+        <ProductsGridEmptyMessageClient category={category} page={page} />
       </Suspense>
-      <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(163px,1fr))] gap-2.5">
+      <div className="grid w-full grid-cols-[repeat(auto-fit,minmax(182px,1fr))] gap-2.5 sm:grid-cols-[repeat(auto-fit,minmax(262px,1fr))]">
         <Suspense fallback={<ProductsGridSkeleton />}>
-          <ProductsGridLoader category={category} />
+          <ProductsGridLoader category={category} page={page} />
         </Suspense>
       </div>
-    </div>
+      <Suspense fallback={null}>
+        <NextPageButton category={category} page={page} />
+      </Suspense>
+    </>
   );
 }
 
-async function ProductsGridLoader({ category }: ProductsGridProps) {
+async function ProductsGridLoader({ category, page }: ProductsGridProps) {
   const queryClient = getQueryClient();
-  await queryClient.prefetchQuery(productsOptions({ category }));
+  await queryClient.prefetchQuery(productsOptions({ category, page }));
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <ProductsGridClient category={category} />
+      <ProductsGridClient category={category} page={page} />
     </HydrationBoundary>
   );
 }
@@ -40,7 +45,7 @@ function ProductsGridSkeleton() {
   return (
     <>
       {Array.from({ length: 8 }).map((_, index) => (
-        <div key={index} className="flex flex-col overflow-hidden rounded-[10px] border border-stroke bg-white">
+        <div key={index} className="flex flex-col overflow-hidden rounded-[10px] bg-white md:rounded-[20px]">
           <div className="p-[19px]">
             <Skeleton className="aspect-square w-full rounded-[6px]" />
           </div>

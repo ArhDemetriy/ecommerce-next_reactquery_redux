@@ -68,7 +68,7 @@ export function Header() {
       <div className="flex items-center justify-between gap-7.5">
         {/* Левая часть - только desktop */}
         <Logo className="hidden sm:flex" />
-        <Link href="/products" className="hidden items-center gap-2.5 rounded-[10px] bg-background px-5 py-3.5 sm:flex">
+        <Link href="/" className="hidden items-center gap-2.5 rounded-[10px] bg-background px-5 py-3.5 sm:flex">
           <Image src="/Filter.svg" alt="Filter" width={24} height={24} className="size-6 shrink-0" />
           <span className="text-body-bold text-black">Каталог</span>
         </Link>

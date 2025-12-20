@@ -11,7 +11,7 @@ import type { ApiResponse } from '@/4_shared/api';
 import { categoriesOptions } from '@/4_shared/query';
 
 export function CategoriesListClient() {
-  return useSuspenseQuery(categoriesOptions()).data.map(category => (
+  return useSuspenseQuery(categoriesOptions()).data?.map(category => (
     <CategoryItem key={category.uuid} category={category} />
   ));
 }
