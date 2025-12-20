@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 
 import { CategoryGridHorizontal } from '@/1_widgets/CategoryGrid';
 import { ProductsGrid } from '@/1_widgets/ProductsGrid';
-import { categoriesOptions, categoryOptions } from '@/4_shared/query';
+import { categoryOptions } from '@/4_shared/query';
 import { getQueryClient } from '@/4_shared/query/getQueryClient';
 
 interface Props {
@@ -11,30 +11,30 @@ interface Props {
 }
 
 export const dynamicParams = true;
-// export async function generateStaticParams() {
-//   return [];
+export async function generateStaticParams() {
+  return [];
 
-//   // try {
-//   //   const queryClient = getQueryClient();
+  // try {
+  //   const queryClient = getQueryClient();
 
-//   //   const allCategories = await queryClient.fetchQuery(categoriesOptions());
-//   //   if (!allCategories?.length) return [];
+  //   const allCategories = await queryClient.fetchQuery(categoriesOptions());
+  //   if (!allCategories?.length) return [];
 
-//   //   const uuids: Set<(typeof allCategories)[number]['uuid']> = new Set();
-//   //   (function extractSlugs(categories: typeof allCategories) {
-//   //     for (const { uuid, children } of categories) {
-//   //       if (uuids.has(uuid)) continue;
-//   //       uuids.add(uuid);
-//   //       if (children?.length) extractSlugs(children);
-//   //     }
-//   //   })(allCategories);
+  //   const uuids: Set<(typeof allCategories)[number]['uuid']> = new Set();
+  //   (function extractSlugs(categories: typeof allCategories) {
+  //     for (const { uuid, children } of categories) {
+  //       if (uuids.has(uuid)) continue;
+  //       uuids.add(uuid);
+  //       if (children?.length) extractSlugs(children);
+  //     }
+  //   })(allCategories);
 
-//   //   return Array.from(uuids).map(uuid => ({ slug: uuid }) satisfies Props);
-//   // } catch (error) {
-//   //   console.error('Ошибка при генерации статических параметров категорий:', error);
-//   //   return [];
-//   // }
-// }
+  //   return Array.from(uuids).map(uuid => ({ slug: uuid }) satisfies Props);
+  // } catch (error) {
+  //   console.error('Ошибка при генерации статических параметров категорий:', error);
+  //   return [];
+  // }
+}
 
 export async function generateMetadata({ params }: { params: Promise<Props> }) {
   const queryClient = getQueryClient();
