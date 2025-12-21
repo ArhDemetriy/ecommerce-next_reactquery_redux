@@ -57,3 +57,258 @@ API
 <https://ecommerce-next-reactquery-redux.vercel.app/>
 
 ## Документация по проекту
+
+### Запуск проекта
+
+```bash
+# Установка зависимостей
+bun install
+
+# Запуск dev-сервера
+bun dev
+
+# Сборка для продакшена
+bun run build
+```
+
+Проект использует **Bun** как пакетный менеджер и рантайм. При необходимости можно использовать npm/yarn, но рекомендуется Bun для скорости.
+
+---
+
+### Архитектура проекта (Feature-Sliced Design)
+
+Проект организован по методологии **FSD** с небольшой адаптацией — слои пронумерованы для наглядности и удобства навигации в файловой системе:
+
+```
+src/
+├── 0_app/      # Инициализация приложения
+├── 1_widgets/  # Композиционные блоки страниц
+├── 2_features/ # Интерактивные пользовательские сценарии
+├── 3_entities/ # Бизнес-сущности
+└── 4_shared/   # Переиспользуемый код
+```
+
+| Слой         | Назначение                          | Примеры                                            |
+| ------------ | ----------------------------------- | -------------------------------------------------- |
+| `0_app`      | Провайдеры, глобальная конфигурация | `QueryProvider`, `StoreProvider`                   |
+| `1_widgets`  | Самодостаточные блоки UI            | `Header`, `ProductsGrid`, `Cart`, `CategoriesList` |
+| `2_features` | Фичи с бизнес-логикой               | `ProductCartControl`, `CartQuantityControl`        |
+| `3_entities` | Доменные сущности и их логика       | `Cart` (Redux slice)                               |
+| `4_shared`   | Утилиты, UI-примитивы, API          | `api/`, `query/`, `redux/`, `ui/`                  |
+
+Такая структура приятна в работе: слои чётко изолированы, зависимости идут только сверху вниз. Добавление новой сущности или фичи не требует перелопачивания половины проекта — просто создаёшь папку в нужном слое и работаешь.
+
+---
+
+### API и получение данных (TanStack Query)
+
+#### Типизированный API-клиент
+
+Для работы с API используется `openapi-fetch` — библиотека, которая обеспечивает полную типизацию запросов на основе OpenAPI-схемы. Типы описаны в формате `paths`, что позволяет в будущем перейти на автогенерацию из спецификации бэкенда.
+
+```typescript
+// src/4_shared/api/client.ts
+export const requestClient = createClient<paths>({
+  baseUrl: BASE_URL,
+  headers: { 'Content-Type': 'application/json' },
+});
+```
+
+#### Query Options
+
+Все запросы инкапсулированы в фабричные функции `*Options()` в `src/4_shared/query/query-options.ts`:
+
+```typescript
+// Пример: получение категории
+export function categoryOptions({ idOrSlug }) {
+  return queryOptions({
+    queryKey: [{ name: 'category', required: { idOrSlug }, optional: {} }],
+    queryFn: async () => { /* ... */ },
+    enabled: Boolean(idOrSlug),
+  });
+}
+```
+
+**Структура queryKey** — объект с разделением на `required` и `optional` параметры. Это не просто прихоть: такой подход упрощает инвалидацию кеша и делает ключи самодокументируемыми.
+
+Доступные options:
+
+- `categoriesOptions()` — список всех категорий
+- `categoryOptions({ idOrSlug })` — категория по UUID или slug
+- `productsOptions({ category?, page? })` — товары с пагинацией
+- `productsInfiniteOptions()` — infinite query для бесконечной прокрутки
+- `productByUuidOptions()` / `productBySlugOptions()` — детали товара
+
+#### SSR и гидратация
+
+Серверные компоненты используют паттерн **prefetch + HydrationBoundary**:
+
+```typescript
+// Серверный компонент
+async function ProductsGridLoader({ category }) {
+  const queryClient = getQueryClient();
+  await queryClient.prefetchQuery(productsOptions({ category }));
+
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      <ProductsGridClient category={category} />
+    </HydrationBoundary>
+  );
+}
+```
+
+`getQueryClient()` обёрнут в `cache()` из React — это гарантирует один инстанс клиента на запрос. Данные загружаются на сервере, сериализуются и передаются клиенту без повторных запросов.
+
+---
+
+### Состояние приложения (Redux Toolkit)
+
+#### Конфигурация Store
+
+Redux используется исключительно для клиентского состояния — корзины. Серверные данные живут в TanStack Query, и это разделение ответственности делает архитектуру чистой и предсказуемой.
+
+```typescript
+// src/0_app/redux/store.ts
+const rootReducer = combineSlices({
+  cart: persistReducer(
+    { key: 'cart', storage, whitelist: ['cart'] },
+    cartSlice.reducer
+  ),
+});
+```
+
+Корзина персистится в localStorage через `redux-persist`.
+
+#### Cart Slice
+
+Slice корзины (`src/3_entities/Cart/redux/cartSlice.ts`) — компактный и функциональный:
+
+```typescript
+// Состояние: Record<`${productId}_${offerId}`, CartItem>
+interface CartItem {
+  productId: string;
+  offerId: string;
+  count: number;
+}
+```
+
+**Почему ключ составной?** У товара может быть несколько офферов (вариантов покупки) с разными ценами. Составной ключ `${productId}_${offerId}` позволяет добавлять один и тот же товар в разных вариациях.
+Однако в макете нет ui для выбора оффера, потому эта особенность находится только в редаксе.
+
+**Экшены:**
+
+- `addItem` — добавить товар (или увеличить количество)
+- `removeItem` — удалить товар
+- `updateCount` — установить конкретное количество
+- `setCount` — универсальный метод: добавляет/обновляет/удаляет в зависимости от count
+- `clearCart` — очистить корзину
+
+**Селекторы:**
+
+- `selectCart` — весь объект корзины
+- `selectCartItemByKey` — конкретный товар по productId + offerId
+
+#### Типизация
+
+Типы редакса пришлось объявить глобально. Это небольшой костыль, чтобы уменьшить зависимость shared слоя от app:
+
+```typescript
+declare global {
+  type RootState = ReturnType<typeof rootReducer>;
+  type AppStore = ReturnType<typeof makeStore>;
+  type AppDispatch = AppStore['dispatch'];
+}
+```
+
+Типизированные хуки в `src/4_shared/redux/hooks.ts` — просто обёртки с типами:
+
+```typescript
+export const useAppDispatch = useDispatch.withTypes<AppDispatch>();
+export const useAppSelector = useSelector.withTypes<RootState>();
+```
+
+---
+
+### Маршрутизация Next.js
+
+#### Структура роутов
+
+```
+app/
+├── layout.tsx                    # Провайдеры (Query + Redux)
+├── (header)/                     # Route group: страницы с Header
+│   ├── layout.tsx                # Шапка сайта
+│   ├── cart/page.tsx             # Корзина
+│   └── (hero)/                   # Route group: страницы с hero-секцией
+│       ├── layout.tsx            # {hero} + CategoriesList + {children}
+│       ├── page.tsx              # Главная страница
+│       ├── @hero/                # Parallel route для hero-секции
+│       │   ├── default.tsx       # Hero для главной
+│       │   ├── error.tsx         # Fallback при ошибке
+│       │   └── catalog/
+│       │       └── default.tsx   # Hero для каталога (с breadcrumbs)
+│       └── catalog/
+│           ├── page.tsx          # Редирект на главную
+│           └── [slug]/
+│               ├── page.tsx      # Категория или товары
+│               ├── loading.tsx   # Скелетон загрузки
+│               └── not-found.tsx # 404
+```
+
+#### Зачем нужен (hero)?
+
+**Проблема:** По макету на страницах каталога есть:
+
+1. Hero-баннер (меняется: разные breadcrumbs на главной и в категориях)
+2. Список категорий слева (НЕ меняется при навигации)
+3. Контент справа (меняется: сетка категорий или товаров)
+
+По вёрстке `CategoriesList` должен располагаться НИЖЕ hero-баннера. Но в Next.js layout рендерится ДО children, и если поместить `CategoriesList` в layout — он будет визуально выше контента.
+
+При этом `CategoriesList` не должен перезагружаться при навигации между категориями — это бессмысленная трата ресурсов и мигание UI.
+
+**Решение: Parallel Routes**
+
+```tsx
+// app/(header)/(hero)/layout.tsx
+export default function HeroLayout({ children, hero }) {
+  return (
+    <>
+      {hero}
+      <div className="flex">
+        <CategoriesList />          {/* Статичный, не перерендеривается */}
+        <div>{children}</div>       {/* Динамический контент */}
+      </div>
+    </>
+  );
+}
+```
+
+Параллельный роут `@hero` позволяет:
+
+1. **Hero меняется** — разный контент для `/` и `/catalog/[slug]`
+2. **CategoriesList статичен** — живёт в layout, не перезагружается
+3. **Порядок вёрстки соблюдён** — сначала hero, потом CategoriesList + контент
+
+#### Страница каталога
+
+Страница `catalog/[slug]/page.tsx` анализирует категорию и решает, что показывать:
+
+```tsx
+const isProductPage = !category.children?.length;
+
+if (!isProductPage) {
+  return <CategoryGridHorizontal parentSlug={slug} />;  // Подкатегории
+}
+return <ProductsGrid category={category.uuid} page={page} />;  // Товары
+```
+
+Если у категории есть дочерние — показываем сетку подкатегорий. Если нет — показываем товары с пагинацией. Логика в одном месте, роутинг простой.
+
+---
+
+### Примечание по вёрстке
+
+Адаптивность реализована, но с оговорками. Макет предоставлен только для десктопа и мобилки, промежуточные состояния в макете не реализованы.
+
+Дизайн-токены (цвета, типографика) вынесены в Tailwind.
