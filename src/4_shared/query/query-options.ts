@@ -30,16 +30,27 @@ export function categoryOptions({ idOrSlug }: PartialBy<PathParams<'/api/categor
   return queryOptions({
     queryKey: [{ name: 'category', required: { idOrSlug }, optional: {} }] as const,
     queryFn: async () => {
+      console.log('[categoryOptions] queryFn START, idOrSlug:', idOrSlug);
       if (!idOrSlug) throw new Error('Не указан id или slug категории');
-      const { data, error } = await requestClient.GET('/api/categories/{idOrSlug}', {
-        params: { path: { idOrSlug } },
-      });
-      if (error) {
-        console.error(`Не удалось получить категорию: ${idOrSlug} ; Error mesage: ${error.message}`);
-        return null;
+
+      try {
+        const { data, error, response } = await requestClient.GET('/api/categories/{idOrSlug}', {
+          params: { path: { idOrSlug } },
+        });
+
+        console.log('[categoryOptions] response status:', response?.status, 'ok:', response?.ok);
+
+        if (error) {
+          console.error(`[categoryOptions] API error for ${idOrSlug}:`, error);
+          return null;
+        }
+        if (!data.data) console.error('[categoryOptions] No data in response');
+        console.log('[categoryOptions] queryFn SUCCESS, data:', data.data ? 'present' : 'null');
+        return data.data ?? null;
+      } catch (fetchError) {
+        console.error('[categoryOptions] FETCH ERROR (network/CORS?):', fetchError);
+        throw fetchError;
       }
-      if (!data.data) console.error('Не получены данные категории');
-      return data.data ?? null;
     },
     enabled: Boolean(idOrSlug),
     placeholderData: keepPreviousData,
